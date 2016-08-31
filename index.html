@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>15 puzzle</title>
+ 
+        <style type="text/css">
+            body {
+                margin:0px;                
+                //background-color:#181d5b;
+		background-image:url("./images/KEWAZINGA.jpg");
+		background-repeat: repeat-x;
+		background-attachment: fixed;
+            }
+             div.main {
+                width:1200px;
+                height:600px;
+              //  background-color:#6eb7f6;
+                margin:0 auto
+             }
+             #menu {
+                width:400px;
+                height:400px;
+                position:relative;
+                float:right;  
+                top:-400px;
+                right: 100px;
+             }
+            #field {
+               width: 408px;
+               height: 408px; 
+               position:relative;
+               top: -50px;
+               left:100px;
+-webkit-user-select: none;
+             //  border: 2px solid white;
+            //   background: #0f0f31;
+           }   
+           #field  div {
+               width: 18px;
+               height: 38px; 
+               padding:30px 40px;
+               position:absolute; 
+              border: 1px solid white;
+               color:#fff;
+               font-size:30px; 
+font-family: cursive; 
+text-shadow: 2px 2px black;
+               background-image: url("./images/stone1.jpg");
+		box-shadow: 3px 3px 2px black;
+            }    
+
+            #field #win {
+               position: absolute; 
+               left: 125px;
+               top: 50px;
+               width: auto;
+               height: auto; 
+               padding:0px; 
+               border: none;
+               color: blanchedalmond;
+		font-size: 10px; 
+               background: inherit;
+box-shadow:none;
+           } 
+            p {
+                margin:0px;
+padding-top:20px;
+                width:100%;
+		height:100px;
+                position:relative;
+                text-align: center;
+                color: blanchedalmond;
+ 		font-family: cursive; 
+		font-size: 50px; 
+background-image: url("./images/wood1.jpg");
+background-position: top;  
+text-shadow: 2px 2px black;
+font-weight: inherit;
+ 
+            }
+
+
+#bottom {
+top:650px;
+background-position: bottom;  
+ height:100px;
+            }
+
+button{
+
+color: blanchedalmond;
+background-color: initial;
+font-family: cursive; 
+font-size: 30px;
+border: none;
+text-shadow: 2px 2px black;
+border-radius: 15px;
+position:absolute;
+
+}
+        </style>
+</head>
+<body>
+         <p>15 PUZZLE GAME</p> 
+       <p id="bottom"></p> 
+     <div class="main">
+
+         <div id="field"></div>
+         <div id="menu"></div>
+     </div>
+    <script>   
+    var coordDifference = 102;
+    var easy = 6,
+        medium = 20,
+        hard = 100;
+    var start = false;
+    var RUN = 0;
+
+    var orderArray = [];
+    createBlocks(); 
+    function createBlocks() {
+          var commandText = "";
+        var X = 0, Y = 0, blockObject;
+        for (var i = 1; i <= 16 ; ++i) {
+            commandText += '<div style = "border-radius: 15px" border-radius: 25px; onmouseover = "checkMove(this)"   onmouseout = "returnColor(this)" onclick = "moveBlock(this)" id="block' + i + '">' + i + '</div>';
+        }
+        document.getElementById("field").innerHTML = commandText;
+        for (var i = 1; i <= 16 ; ++i) {
+            var element = document.getElementById("block" + i);
+            element.style.top = Y + "px";
+            element.style.left = X + "px";
+            blockObject = new Object();
+            blockObject.id = i;        
+            blockObject.x = X + "px";
+            blockObject.y = Y + "px";
+            orderArray.push(blockObject); 
+            X += coordDifference;
+            if (i % 4 == 0) {
+                X = 0;
+                Y += coordDifference;
+            }
+        }
+        document.getElementById("block16").style.opacity = 0;
+        createMenu();
+    }
+    function moveBlock(activeBlock) {
+        if (RUN) {
+            var emptyBlock = document.getElementById("block16");
+            if (activeBlock == emptyBlock)
+                return 0;
+            var delta = 102;
+            if (blocksComparison(activeBlock, emptyBlock, delta)) {
+                blockshift(activeBlock, emptyBlock);
+                winCheck();
+            }
+
+        }
+    }
+
+	
+	var Interval;
+
+    function winCheck() {
+        if (!start)
+            return false
+        var iBlock;
+        for (var i = 0; i < 16; ++i) {
+            iBlock = document.getElementById("block" + (i + 1));
+            if (iBlock.style.left == orderArray[i].x && iBlock.style.top == orderArray[i].y)
+                continue;
+            else
+                return false;
+        }
+        document.getElementById("field").innerHTML = '<div id="win"> VICTORY! </div>'; 	
+	Interval = setInterval(function () {victoryGrow()}, 10)
+	var size = 20;
+
+	function victoryGrow(){
+        document.getElementById("win").style.fontSize = (size++) + "px";
+if (size > 80)
+    clearInterval(Interval);
+RUN = 0;
+	}
+
+
+
+	document.getElementById("menu").innerHTML = '<button id="buttonTry" onmouseover = "size(this, 1)" onmouseout = "size(this, 0)" onclick = "createBlocks();">Try again?!</button>';
+        start = false;
+        return true;
+    }
+
+    function checkMove(activeBlock) {
+        if (activeBlock == document.getElementById("block16"))
+            return 0;
+        var delta = 102;
+        if (blocksComparison(activeBlock,document.getElementById("block16"), delta)) {
+            activeBlock.style.background = "#15ef21";
+        }
+        else
+            activeBlock.style.background = "red";
+    }
+
+    function returnColor(obj) {
+       obj.style.backgroundImage = 'url("./images/stone1.jpg")';
+    }
+
+    function blocksComparison(activeBlock, emptyBlock, delta) { 
+        if ((activeBlock.style.left == emptyBlock.style.left && activeBlock.style.top == (parseInt(emptyBlock.style.top) - delta) + "px") ||
+            (activeBlock.style.left == emptyBlock.style.left && activeBlock.style.top == (parseInt(emptyBlock.style.top) + delta) + "px") ||
+            (activeBlock.style.left == (parseInt(emptyBlock.style.left) - delta + "px") && activeBlock.style.top == emptyBlock.style.top) ||
+            (activeBlock.style.left == (parseInt(emptyBlock.style.left) + delta + "px") && activeBlock.style.top == emptyBlock.style.top)) {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    function createMenu() {
+        document.getElementById("menu").innerHTML = '<button id="buttonEasy" style="top:0px" onmouseover = "size(this, 1)" onmouseout = "size(this, 0)" onclick = "mixBlocks(easy)">Level: EASY </button>\
+                                                 <button id="buttonMedium" style="top:50px"  onmouseover = "size(this, 1)" onmouseout = "size(this, 0)"  onclick = "mixBlocks(medium)">Level: MEDIUM </button>\
+ <button id="buttonHard" style="top:100px"  onmouseover = "size(this, 1)" onmouseout = "size(this, 0)"  onclick = "mixBlocks(hard)">Level: HARD </button>';
+    }
+
+    function size(element, key) {
+        if (key)
+            element.style.fontSize = '40px';
+        else
+            element.style.fontSize = '30px';
+    }
+     
+    function mixBlocks(counter) {
+        RUN = 1;
+        var randId = null,
+            oldRandId = null,
+            randBlock;
+        for (var i = 0; i < counter; ++i) {
+            randId = Math.floor((Math.random() * 15) + 1); 
+            if (oldRandId == randId) {
+                i--;
+                continue;
+            }
+            randBlock = document.getElementById("block" + randId);
+            if (blocksComparison(randBlock, document.getElementById("block16"), coordDifference)) {
+                blockshift(randBlock, document.getElementById("block16"));
+                oldRandId = randId;
+            }
+            else
+                i--;
+        }
+        document.getElementById("menu").innerHTML = '<button id="restart" onmouseover = "size(this, 1)" onmouseout = "size(this, 0)" onclick = "restart()">RESTART</button>';
+        start = true;
+    }
+
+function run(button) {
+var x = Math.floor((Math.random() * 500) -100); ;
+var y = Math.floor((Math.random() * 500) -100); ;
+button.style.position = "relative";
+button.style.top = x + "px";
+button.style.left = y + "px";
+    }   
+
+    function blockshift(block1, block2) {
+        var temp;
+        temp = block1.style.left;
+        block1.style.left = block2.style.left;
+        block2.style.left = temp;
+        temp = block1.style.top;
+        block1.style.top = block2.style.top;
+        block2.style.top = temp;
+    }   
+
+    function restart(){
+	createBlocks();	
+	start = false;
+    }	
+ 
+
+
+    </script>
+</body>
+</html> 
